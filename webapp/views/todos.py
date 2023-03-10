@@ -1,8 +1,9 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse, reverse_lazy
 from django.db.models import Q
 from django.views.generic import DetailView, CreateView, UpdateView, DeleteView, ListView
 from django.utils.http import urlencode
-
+from django.views.generic.detail import SingleObjectTemplateResponseMixin, SingleObjectMixin
 
 from webapp.forms import ToDoForm, SearchForm, ProjectForm
 from webapp.models import Project
@@ -37,7 +38,6 @@ class ToDoDeleteView(DeleteView):
     model = ToDo
     success_url = reverse_lazy('index')
 
-
 class ProjectTasksView(ListView):
     template_name = 'project_tasks.html'
     model = ToDo
@@ -47,6 +47,8 @@ class ProjectTasksView(ListView):
     paginate_orphans = 1
 
     def get(self, request, *args, **kwargs):
+        self.project_id = kwargs['project_id']
+        print('project_id =', self.project_id)
         self.form = self.get_search_form()
         self.search_value = self.get_search_value()
         return super().get(request, *args, **kwargs)
@@ -62,6 +64,7 @@ class ProjectTasksView(ListView):
     def get_queryset(self):
         queryset = super().get_queryset().exclude(is_deleted=True)
         if self.project_id:
+            print('self.project_id =', self.project_id)
             query = Q(project=self.project_id)
             queryset = queryset.filter(query)
         return queryset
@@ -73,13 +76,11 @@ class ProjectTasksView(ListView):
             context['query'] = urlencode({'search': self.search_value})
         return context
 
-
 class ProjectsView(ListView):
     template_name = 'projects.html'
     model = Project
     context_object_name = 'projects'
     ordering = ('created_at',)
-
 
 class ProjectCreateView(CreateView):
     template_name = 'project_create.html'
@@ -97,6 +98,13 @@ class ProjectToDoCreateView(CreateView):
     form_class = ToDoForm
 
     def get(self, request, *args, **kwargs):
+        print('request = ', request)
+        print('args = ', args)
+        print('kwargs = ', kwargs)
+        pk = kwargs['pk']
+        print('pk = ', pk)
+        args = (pk,)
+        print('args = ', args)
         self.object = None
         return super().get(request, *args, **kwargs)
 
