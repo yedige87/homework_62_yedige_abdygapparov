@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title%}ToDo{% endblock %}
+{% block menu %}
+    <a href="{% url 'todo_add' %}">Add ToDo</a>
+    <a href="{% url 'todo_update' todo.pk%}">Update ToDo</a>
+    <a href="{% url 'todo_delete' todo.pk%}">Delete ToDo</a>
+{% endblock %}
+{% block content %}
+    {% if todo.is_deleted %}
+        <h1>Ошибка 404</h1>
+        <h1>Задача не найдена</h1>
+    {% else %}
+        <div class="container">
+            <h1>Задача</h1>
+            <p>Название : {{ todo.title }}</p>
+            <p>Описание : {{ todo.text }}</p>
+            <p>Завершить: {{ todo.deadline }}</p>
+            <p>Статус   : {{ todo.get_status_display }}</p>
+            <p>Проект   : {{ todo.project }}</p>
+            <p>Тип      : {{ todo.type }}</p>
+            <p>Создано: {{ todo.created_at }}</p>
+        </div>
+    {% endif %}
+{% endblock %}
