@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Project tasks{% endblock %}
+{% block menu %}
+    <a href="{% url 'todo_add' %}">Add ToDo</a>
+    <a href="{% url 'projects_view' %}">Projects</a>
+{% endblock %}
+{% block content %}
+{% include 'partial/search.html' %}
+    <br/>
+    {% if todos %}
+    <h1>Задачи проекта "{{todos.0.project}}"</h1>
+    <table>
+        <tbody>
+        <tr class="head">
+            <th>Полное  наименование  задачи</th>
+            <th>Завершить</th>
+            <th>Статус</th>
+            <th>Проект</th>
+            <th>Тип</th>
+            <th>Подробнее</th>
+        </tr>
+
+    {% for todo in todos %}
+        <tr>
+            <td>{{todo.title}}</td>
+            <td>{{todo.deadline}}</td>
+            <td>{{todo.get_status_display}}</td>
+            <td>{{todo.project}}</td>
+            <td>{{todo.type}}</td>
+            <td><a href="{% url 'todo_detail' todo.id %}">Подробнее... </a></td>
+        </tr>
+    {% endfor %}
+        </tbody>
+    </table>
+    <br/>
+    {% else %}
+    <h1>Ошибка 404</h1>
+    <h1>задачи не найдены.</h1>
+    {% endif %}
+{% endblock %}
+

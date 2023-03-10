@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Projects{% endblock %}
+{% block menu %}
+    <a href="{% url 'project_add' %}">Add Project</a>
+{% endblock %}
+{% block content %}
+    <br/>
+    {% if projects %}
+    <h1>Список проектов</h1>
+    <table>
+        <tbody>
+        <tr class="head">
+            <th>Наименование</th>
+            <th>Начало</th>
+            <th>Окончание</th>
+            <th>Подробнее</th>
+        </tr>
+
+    {% for project in projects %}
+        <tr>
+            <td>{{project.project}}</td>
+            <td>{{project.date_start}}</td>
+            <td>{{project.date_end}}</td>
+            <td><a href="{% url 'project_detail' project.id %}">Подробнее... </a></td>
+        </tr>
+    {% endfor %}
+        </tbody>
+    </table>
+    <br/>
+    {% else %}
+    <h1>Ошибка 404</h1>
+    <h1>Страница отсутствует.</h1>
+    {% endif %}
+{% endblock %}
+

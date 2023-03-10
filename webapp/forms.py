@@ -4,7 +4,7 @@ from datetime import datetime
 from django import forms
 from django.core.exceptions import ValidationError
 
-from webapp.models import ToDo
+from webapp.models import ToDo, Project
 
 
 def check_date(ymd):
@@ -39,12 +39,13 @@ def check_date(ymd):
 class ToDoForm(forms.ModelForm):
     class Meta:
         model = ToDo
-        fields = ('title', 'text', 'deadline', 'status', 'type')
+        fields = ('title', 'text', 'deadline', 'status', 'project', 'type')
         labels = {
             'title': 'Задача',
             'text': 'Описание',
             'deadline': 'Дедлайн',
             'status': 'Статус',
+            'project': 'Проект',
             'type': 'Тип'
         }
 
@@ -70,6 +71,16 @@ class SearchForm(forms.Form):
     search = forms.CharField(max_length=20, required=False, label='Найти')
 
 
+class ProjectForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = ('project', 'text', 'date_start', 'date_end')
+        labels = {
+            'project': 'Проект',
+            'text': 'Описание',
+            'date_start': 'Начало',
+            'date_end': 'Окончание'
+        }
 
 
 
