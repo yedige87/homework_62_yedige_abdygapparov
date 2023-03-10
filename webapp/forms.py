@@ -4,7 +4,7 @@ from datetime import datetime
 from django import forms
 from django.core.exceptions import ValidationError
 
-from webapp.models import ToDo, Project
+from webapp.models import ToDo
 
 
 def check_date(ymd):
@@ -39,13 +39,12 @@ def check_date(ymd):
 class ToDoForm(forms.ModelForm):
     class Meta:
         model = ToDo
-        fields = ('title', 'text', 'deadline', 'status', 'project', 'type')
+        fields = ('title', 'text', 'deadline', 'status', 'type')
         labels = {
             'title': 'Задача',
             'text': 'Описание',
             'deadline': 'Дедлайн',
             'status': 'Статус',
-            'project': 'Проект',
             'type': 'Тип'
         }
 
