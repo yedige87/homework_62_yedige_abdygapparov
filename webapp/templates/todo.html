@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% block title%}ToDo{% endblock %}
 {% block menu %}
-    <a href="{% url 'todo_add' %}">Add ToDo</a>
-    <a href="{% url 'todo_update' todo.pk%}">Update ToDo</a>
-    <a href="{% url 'todo_delete' todo.pk%}">Delete ToDo</a>
+{% if user.is_authenticated %}
+    <a href="{% url 'todo_update' todo.pk%}" class="btn btn-success">Update ToDo</a>
+    <a href="{% url 'todo_delete' todo.pk%}" class="btn btn-danger">Delete ToDo</a>
+{% endif %}
 {% endblock %}
 {% block content %}
     {% if todo.is_deleted %}

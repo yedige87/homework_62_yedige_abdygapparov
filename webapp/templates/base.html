@@ -13,11 +13,28 @@
 <body>
     <nav class="navbar">
     <div class="container">
-        <ul class="menu">
+       <ul class="menu">
             <li>
-                <a href="{% url 'index' %}">Return to Home Page</a>
+                <a href="{% url 'index' %}" class="btn btn-primary">Home</a>
                 {% block menu %}{% endblock %}
+
             </li>
+            {% if user.is_authenticated %}
+                <li>
+                    <a href="{% url 'todo_add' %}" class="btn btn-primary">Add Task</a>
+                </li>
+                <li>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-primary" value="Выйти">
+                    </form>
+                </li>
+                <li>Привет, {{ user.username }}</li>
+
+            {% else %}
+                <li><a href="{% url 'login' %}" class="btn btn-primary">Войти</a></li>
+            {% endif %}
+
         </ul>
     </div>
 </nav>

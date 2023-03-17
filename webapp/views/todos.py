@@ -3,14 +3,13 @@ from django.urls import reverse, reverse_lazy
 from django.db.models import Q
 from django.views.generic import DetailView, CreateView, UpdateView, DeleteView, ListView
 from django.utils.http import urlencode
-from django.views.generic.detail import SingleObjectTemplateResponseMixin, SingleObjectMixin
 
 from webapp.forms import ToDoForm, SearchForm, ProjectForm
 from webapp.models import Project
 from webapp.models.todos import ToDo
 
 
-class ToDoCreateView(CreateView):
+class ToDoCreateView(LoginRequiredMixin, CreateView):
     template_name = 'todo_create.html'
     model = ToDo
     form_class = ToDoForm
@@ -24,7 +23,7 @@ class ToDoDetail(DetailView):
     model = ToDo
 
 
-class ToDoUpdateView(UpdateView):
+class ToDoUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'todo_update.html'
     form_class = ToDoForm
     model = ToDo
@@ -33,7 +32,7 @@ class ToDoUpdateView(UpdateView):
         return reverse('todo_detail', kwargs={'pk': self.object.pk})
 
 
-class ToDoDeleteView(DeleteView):
+class ToDoDeleteView(LoginRequiredMixin, DeleteView):
     template_name = 'todo_confirm_delete.html'
     model = ToDo
     success_url = reverse_lazy('index')
