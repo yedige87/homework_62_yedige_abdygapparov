@@ -1,4 +1,5 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse, reverse_lazy
 from django.db.models import Q
 from django.views.generic import DetailView, CreateView, UpdateView, DeleteView, ListView
@@ -23,13 +24,37 @@ class ToDoDetail(DetailView):
     model = ToDo
 
 
-class ToDoUpdateView(LoginRequiredMixin, UpdateView):
-    template_name = 'todo_update.html'
+class GroupPermissionMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.groups.filter(name__in=['admin', 'manager']).exists()
+
+
+class ToDoUpdateView(GroupPermissionMixin, SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+    template_name = 'article_update.html'
     form_class = ToDoForm
     model = ToDo
+    success_message = 'Задача обновлена'
+    groups = ['admin', 'manager']
 
     def get_success_url(self):
         return reverse('todo_detail', kwargs={'pk': self.object.pk})
+
+
+# class ArticleUpdateView(PermissionRequiredMixin, SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+#     template_name = 'article_update.html'
+#     form_class = ArticleForm
+#     model = Article
+#     success_message = 'Статья обновлена'
+#     permission_required = 'webapp.change_article'
+#     # permission_denied_message = 'У Вас не хватает прав доступа'
+
+# class ToDoUpdateView(LoginRequiredMixin, UpdateView):
+#     template_name = 'todo_update.html'
+#     form_class = ToDoForm
+#     model = ToDo
+#
+#     def get_success_url(self):
+#         return reverse('todo_detail', kwargs={'pk': self.object.pk})
 
 
 class ToDoDeleteView(LoginRequiredMixin, DeleteView):
