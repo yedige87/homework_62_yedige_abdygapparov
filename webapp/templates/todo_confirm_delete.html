@@ -11,7 +11,7 @@
         <form action="{% url 'confirm_delete' todo.pk %}" method="post">
             {% csrf_token %}
             <p><input type="submit" value="Удалить"></p>
-            <p><a class="btn btn-primary" href="{% url 'index' %}">Отмена</a></p>
+            <p><a class="cancel-btn" href="{% url 'index' %}">Отмена</a></p>
         </form>
     </div>
 {% endblock %}

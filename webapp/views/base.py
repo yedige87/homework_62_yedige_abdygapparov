@@ -1,13 +1,15 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import request
 from django.utils.http import urlencode
 from django.views.generic import RedirectView, ListView
+from django.contrib.auth.models import User
 
 from webapp.forms import SearchForm
 from webapp.models.todos import ToDo, StatusChoice
 
 
-class IndexView(ListView):
+class IndexView(LoginRequiredMixin, ListView):
     template_name = 'index.html'
     model = ToDo
     context_object_name = 'todos'
@@ -18,6 +20,7 @@ class IndexView(ListView):
     def get(self, request, *args, **kwargs):
         self.form = self.get_search_form()
         self.search_value = self.get_search_value()
+        self.extra_context = {'projects': self.projects}
         return super().get(request, *args, **kwargs)
 
     def get_search_form(self):
@@ -27,6 +30,14 @@ class IndexView(ListView):
         if self.form.is_valid():
             return self.form.cleaned_data['search']
         return None
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        user = request.user
+        self.projects = user.projects.all()
+        print('projects =', self.projects)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = super().get_queryset().exclude(is_deleted=True)

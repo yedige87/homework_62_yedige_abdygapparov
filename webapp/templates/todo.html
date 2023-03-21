@@ -2,10 +2,15 @@
 {% block title%}ToDo{% endblock %}
 {% block menu %}
     {% if user.is_authenticated %}
-        {% if perms.webapp.change_todo %}
-            <a href="{% url 'todo_update' todo.pk%}" class="btn btn-success">Update ToDo</a>
+        {% if perms.webapp.add_todo %}
+            <a href="{% url 'todo_add' %}" class="btn btn-primary">Create Task</a>
         {% endif %}
-    <a href="{% url 'todo_delete' todo.pk%}" class="btn btn-danger">Delete ToDo</a>
+        {% if perms.webapp.change_todo %}
+            <a href="{% url 'todo_update' todo.pk%}" class="btn btn-success">Update Task</a>
+        {% endif %}
+        {% if perms.webapp.delete_todo %}
+            <a href="{% url 'todo_delete' todo.pk%}" class="btn btn-danger">Delete Task</a>
+        {% endif %}
 {% endif %}
 {% endblock %}
 {% block content %}

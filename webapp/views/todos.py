@@ -1,16 +1,20 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.db.models import Q
 from django.views.generic import DetailView, CreateView, UpdateView, DeleteView, ListView
 from django.utils.http import urlencode
 
-from webapp.forms import ToDoForm, SearchForm, ProjectForm
+from webapp.forms import ToDoForm, SearchForm, ProjectForm, UserUpdateForm
 from webapp.models import Project
 from webapp.models.todos import ToDo
 
+class GroupPermissionCreateMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.groups.filter(name__in=['Admin', 'Manager', 'TeamLead', 'Developer'  ]).exists()
 
-class ToDoCreateView(LoginRequiredMixin, CreateView):
+class ToDoCreateView(GroupPermissionCreateMixin, LoginRequiredMixin, CreateView):
     template_name = 'todo_create.html'
     model = ToDo
     form_class = ToDoForm
@@ -24,17 +28,17 @@ class ToDoDetail(DetailView):
     model = ToDo
 
 
-class GroupPermissionMixin(UserPassesTestMixin):
+class GroupPermissionEditMixin(UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.groups.filter(name__in=['admin', 'manager']).exists()
+        return self.request.user.groups.filter(name__in=['Admin', 'Manager', 'TeamLead', 'Developer'  ]).exists()
 
 
-class ToDoUpdateView(GroupPermissionMixin, SuccessMessageMixin, LoginRequiredMixin, UpdateView):
-    template_name = 'article_update.html'
+class ToDoUpdateView(GroupPermissionEditMixin, SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+    template_name = 'todo_update.html'
     form_class = ToDoForm
     model = ToDo
     success_message = 'Задача обновлена'
-    groups = ['admin', 'manager']
+    groups = ['Admin', 'Manager']
 
     def get_success_url(self):
         return reverse('todo_detail', kwargs={'pk': self.object.pk})
@@ -55,26 +59,36 @@ class ToDoUpdateView(GroupPermissionMixin, SuccessMessageMixin, LoginRequiredMix
 #
 #     def get_success_url(self):
 #         return reverse('todo_detail', kwargs={'pk': self.object.pk})
+class GroupPermissionDeleteMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.groups.filter(name__in=['Admin', 'Manager', 'TeamLead']).exists()
 
-
-class ToDoDeleteView(LoginRequiredMixin, DeleteView):
+class ToDoDeleteView(GroupPermissionDeleteMixin, LoginRequiredMixin, DeleteView):
     template_name = 'todo_confirm_delete.html'
     model = ToDo
     success_url = reverse_lazy('index')
 
-class ProjectTasksView(ListView):
+class ProjectTasksView(LoginRequiredMixin, ListView):
     template_name = 'project_tasks.html'
     model = ToDo
     context_object_name = 'todos'
     ordering = ('created_at',)
     paginate_by = 10
     paginate_orphans = 1
+    #project = Project.objects.get(pk=project_id)
+    #extra_context = {'project': project}
 
     def get(self, request, *args, **kwargs):
         self.project_id = kwargs['project_id']
         print('project_id =', self.project_id)
+        print(request)
+        project = Project.objects.get(pk=self.project_id)
+        print(project.project)
+        users = project.users.all()
+        print(users)
         self.form = self.get_search_form()
         self.search_value = self.get_search_value()
+        self.extra_context = {'users': users}
         return super().get(request, *args, **kwargs)
 
     def get_search_form(self):
@@ -100,13 +114,17 @@ class ProjectTasksView(ListView):
             context['query'] = urlencode({'search': self.search_value})
         return context
 
-class ProjectsView(ListView):
+class ProjectsView(LoginRequiredMixin, ListView):
     template_name = 'projects.html'
     model = Project
     context_object_name = 'projects'
     ordering = ('created_at',)
 
-class ProjectCreateView(CreateView):
+class GroupPermissionCreateProjectMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.groups.filter(name__in=['Admin', 'Manager']).exists()
+
+class ProjectCreateView(GroupPermissionCreateProjectMixin, LoginRequiredMixin, CreateView):
     template_name = 'project_create.html'
     model = Project
     form_class = ProjectForm
@@ -114,8 +132,34 @@ class ProjectCreateView(CreateView):
     def get_success_url(self):
         return reverse('projects_view')
 
+class GroupPermissionUpdateProjectMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.groups.filter(name__in=['Admin', 'Manager']).exists()
 
-class ProjectToDoCreateView(CreateView):
+class ProjectUpdateView(GroupPermissionUpdateProjectMixin, LoginRequiredMixin, UpdateView):
+    template_name = 'project_update.html'
+    model = Project
+    form_class = ProjectForm
+
+    def get_success_url(self):
+        return reverse('project_view', kwargs={'pk': self.object.pk})
+
+class GroupPermissionUpdateProjectUsersMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.groups.filter(name__in=['Admin', 'Manager', 'TeamLead']).exists()
+
+class ProjectUsersUpdateView(GroupPermissionUpdateProjectUsersMixin, LoginRequiredMixin, UpdateView):
+    template_name = 'project_users_update.html'
+    model = Project
+    form_class = UserUpdateForm
+    success_message = 'Проект обновлен'
+    groups = ['Admin', 'Manager', 'TeamLead']
+
+    def get_success_url(self):
+        return reverse('projects_view')
+
+
+class ProjectToDoCreateView(LoginRequiredMixin, CreateView):
     initial = {'project_id': '1'}
     template_name = 'project_todo_create.html'
     model = ToDo
@@ -134,3 +178,18 @@ class ProjectToDoCreateView(CreateView):
 
     def get_success_url(self):
         return reverse('projects_view')
+
+
+class GroupPermissionDeleteProjectMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.groups.filter(name__in=['Admin', 'Manager']).exists()
+
+class ProjectDeleteView(GroupPermissionDeleteProjectMixin, LoginRequiredMixin, DeleteView):
+    template_name = 'project_confirm_delete.html'
+    model = Project
+    success_url = reverse_lazy('projects_view')
+
+
+class ProjectDetail(DetailView):
+    template_name = 'project.html'
+    model = Project
