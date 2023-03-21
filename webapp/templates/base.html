@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
-    <title>{% block title %}Blog{% endblock %}</title>
+    <title>{% block title %}Projects & Tasks{% endblock %}</title>
 </head>
 <body>
     <nav class="navbar">
@@ -20,9 +20,7 @@
 
             </li>
             {% if user.is_authenticated %}
-                <li>
-                    <a href="{% url 'todo_add' %}" class="btn btn-primary">Add Task</a>
-                </li>
+
                 <li>
                     <form action="{% url 'logout' %}" method="post">
                         {% csrf_token %}
