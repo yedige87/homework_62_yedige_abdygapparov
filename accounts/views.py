@@ -1,6 +1,5 @@
-from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, CreateView
 
@@ -14,6 +13,10 @@ class LoginView(TemplateView):
     def get(self, request, *args, **kwargs):
         form = self.form()
         context = {'form': form}
+        print(request.GET, 'get')
+        next = request.GET.get('next')
+        if next:
+            return redirect('/auth/accounts/create/')
         return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):
@@ -29,7 +32,9 @@ class LoginView(TemplateView):
         if not user:
             return redirect('index')
         login(request, user)
+
         messages.success(request, f'Добро пожаловать, {user.username} !')
+
         next = request.GET.get('next')
         if next:
             return redirect(next)
@@ -56,6 +61,9 @@ class RegisterView(CreateView):
         context = {'form': form}
         return self.render_to_response(context)
 
-
-
-
+# def register_view(request, *args, **kwargs):
+#     if request.method == 'POST':
+#         form = CustomUserCreationForm(data=request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             login(request, user)
