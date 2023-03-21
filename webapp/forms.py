@@ -2,7 +2,6 @@ import re
 from datetime import datetime
 
 from django import forms
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 
 from webapp.models import ToDo, Project
@@ -38,7 +37,6 @@ def check_date(ymd):
 
 
 class ToDoForm(forms.ModelForm):
-    # project = forms.CharField(disabled=True)
 
     class Meta:
         model = ToDo
@@ -74,7 +72,6 @@ class SearchForm(forms.Form):
     search = forms.CharField(max_length=20, required=False, label='Найти')
 
 
-
 class ProjectForm(forms.ModelForm):
 
     class Meta:
@@ -86,6 +83,7 @@ class ProjectForm(forms.ModelForm):
             'date_start': 'Начало',
             'date_end': 'Окончание'
         }
+
 
 class UserUpdateForm(forms.ModelForm):
 

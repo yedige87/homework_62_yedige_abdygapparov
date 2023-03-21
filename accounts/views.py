@@ -61,9 +61,3 @@ class RegisterView(CreateView):
         context = {'form': form}
         return self.render_to_response(context)
 
-# def register_view(request, *args, **kwargs):
-#     if request.method == 'POST':
-#         form = CustomUserCreationForm(data=request.POST)
-#         if form.is_valid():
-#             user = form.save()
-#             login(request, user)

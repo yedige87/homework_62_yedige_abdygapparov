@@ -1,6 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.db.models import Q
 from django.views.generic import DetailView, CreateView, UpdateView, DeleteView, ListView
@@ -10,9 +9,11 @@ from webapp.forms import ToDoForm, SearchForm, ProjectForm, UserUpdateForm
 from webapp.models import Project
 from webapp.models.todos import ToDo
 
+
 class GroupPermissionCreateMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.groups.filter(name__in=['Admin', 'Manager', 'TeamLead', 'Developer'  ]).exists()
+
 
 class ToDoCreateView(GroupPermissionCreateMixin, LoginRequiredMixin, CreateView):
     template_name = 'todo_create.html'
@@ -44,29 +45,16 @@ class ToDoUpdateView(GroupPermissionEditMixin, SuccessMessageMixin, LoginRequire
         return reverse('todo_detail', kwargs={'pk': self.object.pk})
 
 
-# class ArticleUpdateView(PermissionRequiredMixin, SuccessMessageMixin, LoginRequiredMixin, UpdateView):
-#     template_name = 'article_update.html'
-#     form_class = ArticleForm
-#     model = Article
-#     success_message = 'Статья обновлена'
-#     permission_required = 'webapp.change_article'
-#     # permission_denied_message = 'У Вас не хватает прав доступа'
-
-# class ToDoUpdateView(LoginRequiredMixin, UpdateView):
-#     template_name = 'todo_update.html'
-#     form_class = ToDoForm
-#     model = ToDo
-#
-#     def get_success_url(self):
-#         return reverse('todo_detail', kwargs={'pk': self.object.pk})
 class GroupPermissionDeleteMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.groups.filter(name__in=['Admin', 'Manager', 'TeamLead']).exists()
+
 
 class ToDoDeleteView(GroupPermissionDeleteMixin, LoginRequiredMixin, DeleteView):
     template_name = 'todo_confirm_delete.html'
     model = ToDo
     success_url = reverse_lazy('index')
+
 
 class ProjectTasksView(LoginRequiredMixin, ListView):
     template_name = 'project_tasks.html'
@@ -75,8 +63,6 @@ class ProjectTasksView(LoginRequiredMixin, ListView):
     ordering = ('created_at',)
     paginate_by = 10
     paginate_orphans = 1
-    #project = Project.objects.get(pk=project_id)
-    #extra_context = {'project': project}
 
     def get(self, request, *args, **kwargs):
         self.project_id = kwargs['project_id']
@@ -114,15 +100,18 @@ class ProjectTasksView(LoginRequiredMixin, ListView):
             context['query'] = urlencode({'search': self.search_value})
         return context
 
+
 class ProjectsView(LoginRequiredMixin, ListView):
     template_name = 'projects.html'
     model = Project
     context_object_name = 'projects'
     ordering = ('created_at',)
 
+
 class GroupPermissionCreateProjectMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.groups.filter(name__in=['Admin', 'Manager']).exists()
+
 
 class ProjectCreateView(GroupPermissionCreateProjectMixin, LoginRequiredMixin, CreateView):
     template_name = 'project_create.html'
@@ -132,9 +121,11 @@ class ProjectCreateView(GroupPermissionCreateProjectMixin, LoginRequiredMixin, C
     def get_success_url(self):
         return reverse('projects_view')
 
+
 class GroupPermissionUpdateProjectMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.groups.filter(name__in=['Admin', 'Manager']).exists()
+
 
 class ProjectUpdateView(GroupPermissionUpdateProjectMixin, LoginRequiredMixin, UpdateView):
     template_name = 'project_update.html'
@@ -144,9 +135,11 @@ class ProjectUpdateView(GroupPermissionUpdateProjectMixin, LoginRequiredMixin, U
     def get_success_url(self):
         return reverse('project_view', kwargs={'pk': self.object.pk})
 
+
 class GroupPermissionUpdateProjectUsersMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.groups.filter(name__in=['Admin', 'Manager', 'TeamLead']).exists()
+
 
 class ProjectUsersUpdateView(GroupPermissionUpdateProjectUsersMixin, LoginRequiredMixin, UpdateView):
     template_name = 'project_users_update.html'
@@ -183,6 +176,7 @@ class ProjectToDoCreateView(LoginRequiredMixin, CreateView):
 class GroupPermissionDeleteProjectMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.groups.filter(name__in=['Admin', 'Manager']).exists()
+
 
 class ProjectDeleteView(GroupPermissionDeleteProjectMixin, LoginRequiredMixin, DeleteView):
     template_name = 'project_confirm_delete.html'

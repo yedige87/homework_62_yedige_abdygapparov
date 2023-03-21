@@ -1,12 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from django.http import request
 from django.utils.http import urlencode
 from django.views.generic import RedirectView, ListView
-from django.contrib.auth.models import User
 
 from webapp.forms import SearchForm
-from webapp.models.todos import ToDo, StatusChoice
+from webapp.models.todos import ToDo
 
 
 class IndexView(LoginRequiredMixin, ListView):
@@ -56,12 +54,3 @@ class IndexView(LoginRequiredMixin, ListView):
 
 class IndexRedirectView(RedirectView):
     pattern_name = 'index'
-
-# class IndexView(View):
-#
-#     def get(self, request, *args, **kwargs):
-#         articles = Article.objects.exclude(is_deleted=True)
-#         context = {
-#             'articles': articles
-#         }
-#         return render(request, 'index.html', context=context)
